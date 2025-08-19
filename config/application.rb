@@ -13,6 +13,7 @@ module TechlogApp
       g.assets false          # CSS, JavaScriptファイルを自動生成しない
       g.helper false      # helperファイルを自動生成しない
       g.test_framework :rspec # テストフレームワークをrspecに設定
-    end  # ここまで追記
+    end
+    config.i18n.default_locale = :ja
   end
 end
