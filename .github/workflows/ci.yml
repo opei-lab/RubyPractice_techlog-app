@@ -1,6 +1,61 @@
 name: CI
 
 on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      # No external DB needed (SQLite). This block is here for future expansion.
+      # remove if unnecessary.
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+
+      - name: Print Ruby and Bundler versions
+        run: |
+          ruby -v
+          bundle -v
+
+      - name: Brakeman
+        run: bundle exec brakeman --no-pager
+
+      - name: RuboCop
+        run: bundle exec rubocop -f github
+
+      - name: Importmap audit
+        run: bundle exec rake importmap:audit
+
+      - name: Prepare database
+        env:
+          RAILS_ENV: test
+        run: bundle exec rails db:test:prepare
+
+      - name: Run specs
+        env:
+          RAILS_ENV: test
+        run: |
+          if [ -d "spec" ]; then
+            bundle exec rspec --format progress
+          else
+            bundle exec rails test test:system
+          fi
+
+name: CI
+
+on:
   pull_request:
   push:
     branches: [ main ]
